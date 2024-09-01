@@ -1,1 +1,1 @@
-# PRODIGY_AD_04
+This Tic-Tac-Toe game app was developed as part of my internship at Prodigy Infotech. The project was an excellent opportunity to apply my skills in Flutter and mobile app development while creating an engaging and user-friendly game. The goal was to build a polished game experience with functional game logic and a clean interface.
