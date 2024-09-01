@@ -1,0 +1,204 @@
+import 'package:flutter/material.dart';
+import 'game_logic.dart';
+
+void main() {
+  runApp(XOGameApp());
+}
+
+class XOGameApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Tic Tac Toe',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: Colors.lightGreen[100], // Light green background
+        textTheme: TextTheme(
+          headlineMedium: TextStyle(color: Colors.black),
+        ),
+      ),
+      home: GameScreen(),
+    );
+  }
+}
+
+class GameScreen extends StatefulWidget {
+  @override
+  _GameScreenState createState() => _GameScreenState();
+}
+
+class _GameScreenState extends State<GameScreen> {
+  GameLogic _gameLogic = GameLogic();
+  int xWins = 0;
+  int oWins = 0;
+
+  Color? getBoxColor(int index) {
+    return _gameLogic.isGameOver && _gameLogic.winner == 'O'
+        ? Colors.green[800] // Dark green if O has won
+        : _gameLogic.currentPlayer == 'O' && !_gameLogic.isGameOver
+            ? Colors.green[800] // Dark green when it's O's turn
+            : Colors.lightGreen[300]; // Light green otherwise
+  }
+
+  Color getWinnerTextColor() {
+    if (_gameLogic.isGameOver) {
+      return _gameLogic.winner == 'X' ? Colors.white : Colors.green[900]!;
+    }
+    return Colors.black;
+  }
+
+  void _resetPoints() {
+    setState(() {
+      xWins = 0;
+      oWins = 0;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Tic Tac Toe'),
+        backgroundColor: Colors.lightGreen[200],
+      ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '$xWins',
+                  style: TextStyle(
+                    fontSize: 48.0, // Font size to match X and O size
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  ' : ',
+                  style: TextStyle(
+                    fontSize: 48.0, // Font size to match X and O size
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  '$oWins',
+                  style: TextStyle(
+                    fontSize: 48.0, // Font size to match X and O size
+                    color: Colors.green[900],
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              _gameLogic.isGameOver
+                  ? _gameLogic.winner.isNotEmpty
+                      ? '${_gameLogic.winner} Wins!'
+                      : 'It\'s a Draw!'
+                  : '',
+              style: TextStyle(
+                fontSize: 35.0, // Font size to match X and O size
+                color: getWinnerTextColor(), // Set color based on the winner
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Expanded(
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 10.0,
+                mainAxisSpacing: 10.0,
+              ),
+              padding: EdgeInsets.all(16.0),
+              itemCount: 9,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      if (!_gameLogic.isGameOver) {
+                        _gameLogic.makeMove(index);
+                        if (_gameLogic.isGameOver && _gameLogic.winner.isNotEmpty) {
+                          if (_gameLogic.winner == 'X') {
+                            xWins++;
+                          } else if (_gameLogic.winner == 'O') {
+                            oWins++;
+                          }
+                        }
+                      }
+                    });
+                  },
+                  child: AnimatedContainer(
+                    duration: Duration(milliseconds: 300), // Duration for the color transition
+                    decoration: BoxDecoration(
+                      color: getBoxColor(index), // Set color based on the current player or win state
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    child: Center(
+                      child: Text(
+                        _gameLogic.board[index],
+                        style: TextStyle(
+                          color: _gameLogic.board[index] == 'X'
+                              ? Colors.white // White for X
+                              : Colors.green[900], // Dark green for O
+                          fontSize: 48.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                _gameLogic.resetGame();
+              });
+            },
+            child: Text(
+              'Restart Game',
+              style: TextStyle(
+                color: Colors.white, // Ensure text color is white
+                fontWeight: FontWeight.bold,
+                fontSize: 24.0, // Increased font size for button text
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green[800], // Dark green background
+              padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+            ),
+          ),
+          SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: _resetPoints,
+            child: Text(
+              'Reset Points',
+              style: TextStyle(
+                color: Colors.white, // Ensure text color is white
+                fontWeight: FontWeight.bold,
+                fontSize: 24.0, // Increased font size for button text
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green[800], // Dark green background
+              padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+            ),
+          ),
+          SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+}
